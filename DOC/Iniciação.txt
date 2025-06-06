@@ -12,6 +12,10 @@ Passo a Passo para ligar a api e iniciar o bot.
 
 ----------------------------------------------------------------------------------------------------------------------------
 
+Migrar o arquivo json para o banco. 
+
+python migrate_intents.py
+
 o sistema ira gerar um token para cada cliente. 
 
 para gerar o token execute esse coomando no terminal: python -c "import secrets; print(secrets.token_hex(24))"
@@ -23,7 +27,30 @@ migrar todos arquivos json terminal:  python migrate_intents.py
 dicas banco 
 inserir cliente 
 INSERT INTO clients (client_name, access_token) 
-VALUES ('Empresa Teste Principal', '0101db40e33f545c4fbfae985580cd05304fe345b6f6a58f');
+VALUES ('grandao', '0101db40e33f545c4fbfae985580cd05304fe345b6f6a58f');
 
 http://localhost/chatbot/?token=0101db40e33f545c4fbfae985580cd05304fe345b6f6a58f
 
+
+
+INSERT INTO clients (client_name, access_token) 
+VALUES ('caiaqueiro', '48f23c04360a828c62b5971cbb18e3c404b82f6bf1956a3d');
+
+
+48f23c04360a828c62b5971cbb18e3c404b82f6bf1956a3d
+
+
+
+**************************************************************************************************************
+
+o processo para salvar novas alterações será mais simples:
+
+Faça suas alterações no código.
+Execute git add .
+Execute git commit -m "Mensagem descrevendo a alteração"
+Execute git push
+
+
+**************************************************************************************************************
+
+abrir o dashboard streamlit run dashboard.py

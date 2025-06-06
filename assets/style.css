@@ -1,0 +1,66 @@
+/* assets/style.css */
+
+/* Define a altura e a barra de rolagem para o nosso container de chat */
+.chat-container {
+    height: 600px; /* Altura fixa do container do chat */
+    overflow-y: auto; /* Adiciona a barra de rolagem vertical quando o conteúdo transborda */
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre as mensagens */
+}
+
+.msg-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: 85%;
+}
+
+/* Alinha as mensagens do usuário à direita */
+.msg-right {
+    align-self: flex-end;
+    flex-direction: row-reverse; /* Inverte a ordem para avatar vir depois */
+}
+
+/* Alinha as mensagens do bot à esquerda */
+.msg-left {
+    align-self: flex-start;
+}
+
+.avatar {
+    font-size: 1.5rem;
+}
+
+.msg-bubble {
+    padding: 10px 15px;
+    border-radius: 18px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.user-bubble {
+    background-color: #007bff;
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.bot-bubble {
+    background-color: #e4e6eb;
+    color: #050505;
+    border-bottom-left-radius: 4px;
+}
+
+.msg-timestamp {
+    font-size: 0.7rem;
+    color: #b0b3b8;
+    text-align: right;
+    margin-top: 5px;
+}
+
+.user-bubble .msg-timestamp {
+    color: #e0e0e0;
+}
