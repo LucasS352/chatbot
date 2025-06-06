@@ -1,0 +1,96 @@
+    {
+    "processo_configurar_impressora": {
+        "patterns": [
+        "como deixo minha impressora padrao no master?",
+        "como faço a troca de impressora no sistema",
+        "configurar impressora", "impressora padrão"
+        ],
+        "responses": [
+        "Para definir sua impressora como padrão no sistema, siga os passos nas imagens:"
+        ],
+        "images": ["Duvida_impressoraPadrao.png", "Duvida_impressoraPadrao1.png","Duvida_impressoraPadrao2.png"]
+    },
+    "processo_faturar_outra_empresa": {
+        "patterns": [
+        "como faço para faturar a nota em outra empresa?",
+        "como faturar a nota em outra empresa?",
+        "como mudar a empresa no faturamento da nota?",
+        "onde escolho a empresa para faturar a nota?"
+        ],
+        "responses": [
+        "Para faturar a nota em outra empresa, siga estes passos:\n\n1. Acesse o menu 'Venda e Gerenciamento'.\n2. Selecione o pedido desejado e clique em 'Nota'.\n3. Na tela de faturamento, escolha a empresa correta antes de prosseguir.\n\nDessa forma, a nota será emitida pela empresa selecionada."
+        ],
+        "images": ["Duvida_faturanota.png"]
+    },
+    "processo_verificar_pedido_integracao": {
+        "patterns": [
+        "Meu pedido nao caiu no master ainda",
+        "Meu pedido nao esta no master",
+        "nenhum pedido meu caiu no master",
+        "pedido nao integrou"
+        ],
+        "responses": [
+        "Entendi. Primeiro, verifique se os pedidos estão na plataforma do seu integrador (Hub de Marketplace). Se não estiverem lá, o problema é na comunicação entre seu Marketplace e o integrador. Se os pedidos estiverem no integrador mas não no Master, por favor, entre em contato com nosso suporte no tel: (14) 3879-0580."
+        ]
+    },
+    "processo_devolucao_venda": {
+        "patterns": [
+        "Como faço para fazer uma devolução?",
+        "Como faço para devolver uma venda?",
+        "Como funciona o processo de devolução de venda?",
+        "como faço para devolver uma venda no master",
+        "gerar devolução"
+        ],
+        "responses": [
+        "O processo para realizar uma devolução de venda está detalhado nas imagens abaixo:"
+        ],
+        "images": ["Duvida_devolucao0.png", "Duvida_devolucao.png", "Duvida_devolucao1.png", "Duvida_devolucao2.png"]
+    },
+    "processo_estorno_venda": {
+        "patterns": [
+        "Como faço para fazer um estorno da venda?",
+        "estorno de vendas",
+        "extorno de vendas",
+        "como realizo o estorno de vendas"
+        ],
+        "responses": [
+        "Para realizar o estorno de uma venda, siga o passo a passo na imagem:"
+        ],
+        "images": ["Duvida_EstornoVenda.png"]
+    },
+    "processo_excluir_boleto": {
+        "patterns": [
+        "se eu excluir um boleto ele some do sistema?",
+        "excluir boleto afeta o faturamento?",
+        "posso excluir um boleto sem problemas?",
+        "o boleto fica registrado depois de excluir?",
+        "o que acontece se eu excluir um boleto?",
+        "se eu excluir o boleto ele some ou fica em aberto?",
+        "boleto emitido com data errada, o que fazer?"
+        ],
+        "responses": [
+        "Se o boleto ainda não foi remetido ao banco, você pode excluí-lo do sistema sem problemas. Essa ação não afetará o faturamento e, se necessário, você poderá gerar um novo boleto corretamente."
+        ]
+    },
+    "processo_cadastrar_grupo_usuario": {
+        "patterns": [
+        "Como cadastro o grupo de usuario?",
+        "como crio o grupo de usuario?"
+        ],
+        "responses": [
+        "O processo de criação e configuração de um grupo de usuários está nos prints abaixo:"
+        ],
+        "images": ["Duvida_CadastroUsuario.png", "Duvida_CadastroUsuario1.png", "Duvida_CadastroUsuario2.png"]
+    },
+    "processo_enviar_xml_contador": {
+        "patterns": [
+        "preciso enviar meus xmls para contabilidade",
+        "enviar notas fiscais para o contador",
+        "como faço para enviar os xmls?"
+        ],
+        "responses": [
+        "Claro, para enviar os arquivos XML para a sua contabilidade, siga este processo:"
+        ],
+        "images": ["Duvidas_XMLcont.png", "Duvidas_XMLcont1.png"]
+    }
+    }

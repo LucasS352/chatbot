@@ -1,0 +1,12 @@
+    {
+    "suporte_contato_humano": {
+        "patterns": [
+        "preciso de suporte", "ajuda técnica", "telefone do suporte", "falar com atendente",
+        "contato do suporte", "como falo com o suporte", "número da alternativa", "quero falar com uma pessoa",
+        "email do suporte", "preciso falar com alguém"
+        ],
+        "responses": [
+        "Para falar com nossa equipe de suporte, você pode usar os seguintes canais:\n\n• Telefone: (14) 3879-0580\n• E-mail: suporte@systemaster.com.br\n\nNosso horário de atendimento é de Segunda a Sexta, das 8h às 18h."
+        ]
+    }
+    }

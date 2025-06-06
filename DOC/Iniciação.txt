@@ -1,0 +1,29 @@
+Passo a Passo para ligar a api e iniciar o bot. 
+
+    Primeiro, execute a api no Terminal: uvicorn main:app --reload
+
+    depois va no index e o inicie. (verifique se o banco esta ligado, xampp)
+
+
+    ***************************************************************
+
+    regular a confiança:
+       (chat.py) linha: CONFIDENCE_THRESHOLD = 70  # Limiar de confiança (0-100) para aceitar uma resposta do PLN
+
+----------------------------------------------------------------------------------------------------------------------------
+
+o sistema ira gerar um token para cada cliente. 
+
+para gerar o token execute esse coomando no terminal: python -c "import secrets; print(secrets.token_hex(24))"
+
+migrar todos arquivos json terminal:  python migrate_intents.py    
+
+-------------------------------------------------------------------------------------------------------------
+
+dicas banco 
+inserir cliente 
+INSERT INTO clients (client_name, access_token) 
+VALUES ('Empresa Teste Principal', '0101db40e33f545c4fbfae985580cd05304fe345b6f6a58f');
+
+http://localhost/chatbot/?token=0101db40e33f545c4fbfae985580cd05304fe345b6f6a58f
+

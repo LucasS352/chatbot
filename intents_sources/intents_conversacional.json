@@ -1,0 +1,39 @@
+    {
+    "conversacional_saudacao": {
+        "patterns": [
+        "olá", "oi", "hey", "bom dia", "boa tarde", "boa noite",
+        "e aí", "tudo bem", "como vai", "prazer", "ola",
+        "olá, tudo bem?", "oi, bom dia", "boa noite, tudo bem?",
+        "olá, preciso de ajuda", "oi, pode me ajudar?"
+        ],
+        "responses": [
+        "Olá! Sou a Clara, assistente virtual do ERP Master. Como posso ajudar?",
+        "Oi! Em qual tema você precisa de ajuda hoje?"
+        ]
+    },
+    "conversacional_duvida_geral": {
+        "patterns": [
+        "Estou com dúvida em um processo, pode me ajudar?",
+        "Tenho uma dúvida sobre o sistema, como faço?",
+        "preciso de ajuda",
+        "pode me ajudar?"
+        ],
+        "responses": [
+        "Com certeza! Me diga qual é a sua dúvida ou em qual parte do sistema você está com dificuldades, que eu te explico o passo a passo. Se preferir, pode me dizer ou colar aqui a mensagem de erro que aparece."
+        ]
+    },
+    "conversacional_despedida": {
+        "patterns": [
+        "tchau", "adeus", "até logo", "até mais", "até breve", "falou", "valeu", "obrigado", "obrigada",
+        "entendi, muito obrigado","tchauzinho", "flw", "xau", "bye", "goodbye",
+        "funcionou aqui, obrigada", "deu certo, obrigado", "finalizar", "era só isso", "por enquanto é só"
+        ],
+        "responses": [
+        "Até logo! Se precisar de mais alguma coisa, estou à disposição. 😊",
+        "Foi um prazer ajudar! Volte sempre que precisar. 👋",
+        "Tchau! Se tiver mais dúvidas, é só chamar. Até mais!",
+        "Até breve! Estarei aqui se precisar de ajuda. 😄",
+        "Disponha! Se precisar de mais alguma coisa, estou por aqui. 👋"
+        ]
+    }
+    }
