@@ -4,14 +4,35 @@
         "estou com um erro", "deu erro", "apareceu um erro na tela",
         "não consigo salvar o produto", "não consigo concluir a venda porque aparece um erro",
         "não consigo cancelar a venda", "problema na nota fiscal", "problema com nf", "nota fiscal não está saindo",
-        "falha na emissão da nota","quando tento enviar a nota fiscal da erro",
-        "nota fiscal com erro", "não consigo emitir nota", "estou com erro na nota"
+        "falha na emissão da nota", "quando tento enviar a nota fiscal da erro",
+        "nota fiscal com erro", "não consigo emitir nota", "estou com erro na nota",
+        "Estou com um erro no sistema"
         ],
         "responses": [
-        "Entendi. Para que eu possa te ajudar, por favor, escreva ou cole aqui (com Ctrl+V) a mensagem de erro exata que aparece na sua tela.",
-        "Ok, sem problemas. Qual é o texto exato da mensagem de erro? Isso me ajudará a identificar a solução correta para você."
+        "Entendi. Para que eu possa te ajudar, por favor, escreva ou cole aqui (com Ctrl+V) a mensagem de erro exata que aparece na sua tela. Se for um dos erros comuns abaixo, pode clicar no botão:",
+        "Ok, sem problemas. Qual é o texto exato da mensagem de erro? Você também pode escolher uma das opções abaixo se o seu erro for um deles."
         ],
-        "images": ["Colar_Erro.png"]
+        "images": [
+        "Colar_Erro.png"
+        ],
+        "quick_replies": [
+        {
+            "title": "Usuário não autorizado",
+            "payload": "Este Usuário nao esta autorizado a ALTERAR registros"
+        },
+        {
+            "title": "Regime tributário diverge",
+            "payload": "Rejeição: Código Regime Tributário do emitente diverge"
+        },
+        {
+            "title": "Duplicidade de NF-e",
+            "payload": "Rejeição: Duplicidade de NF-e com diferença na Chave de Acesso"
+        },
+        {
+            "title": "Timeout SEFAZ",
+            "payload": "Connection timed out"
+        }
+        ]
     },
     "erro_especifico_usuario_nao_autorizado": {
         "patterns": [
@@ -21,23 +42,41 @@
         "responses": [
         "Este erro indica uma falta de permissão para o seu usuário. O processo para conceder a autorização está detalhado nas imagens abaixo:"
         ],
-        "images": ["Erro_UserNautorizado.png", "Erro_UserNautorizado1.png"]
+        "images": [
+        "Erro_UserNautorizado.png",
+        "Erro_UserNautorizado1.png"
+        ]
     },
     "erro_especifico_regime_tributario": {
         "patterns": [
         "Código Regime Tributário do emitente diverge do cadastro na SEFAZ",
         "Rejeição: Código Regime Tributário do emitente diverge",
-        "erro 481", "rejeição 481"
+        "erro 481",
+        "rejeição 481"
         ],
         "responses": [
         "O erro de 'Regime Tributário divergente' acontece quando o cadastro na SEFAZ não bate com o do sistema. Para resolver:\n\n1. Verifique o regime tributário da sua empresa no site da SEFAZ ou Sintegra.\n2. Compare com o que está cadastrado no sistema Master.\n3. Se estiver diferente, abra um ticket com nosso suporte informando qual o regime correto para fazermos o ajuste."
         ],
-        "images": ["Erro_notaRegime.png", "Erro_notaRegime1.png"]
+        "images": [
+        "Erro_notaRegime.png",
+        "Erro_notaRegime1.png"
+        ],
+        "quick_replies": [
+        {
+            "title": "Falar com suporte",
+            "payload": "falar com atendente"
+        },
+        {
+            "title": "Tenho outra dúvida",
+            "payload": "pode me ajudar?"
+        }
+        ]
     },
     "erro_especifico_duplicidade_nf": {
         "patterns": [
         "Rejeição: Duplicidade de NF-e com diferença na Chave de Acesso",
-        "erro de duplicidade de nota fiscal", "duplicidade de nfe"
+        "erro de duplicidade de nota fiscal",
+        "duplicidade de nfe"
         ],
         "responses": [
         "O erro de duplicidade ocorre quando você tenta emitir uma nota com um número que já foi utilizado e autorizado pela SEFAZ para outra nota.\nPara resolver, você pode alterar manualmente o número da nota para o próximo número sequencial disponível e tentar transmitir novamente."
@@ -45,7 +84,9 @@
     },
     "erro_especifico_timeout_sefaz": {
         "patterns": [
-        "Connection timed out", "erro 10060", "erro http 500 sefaz"
+        "Connection timed out",
+        "erro 10060",
+        "erro http 500 sefaz"
         ],
         "responses": [
         "O erro de 'timeout' geralmente indica uma instabilidade ou problema de comunicação com os servidores da SEFAZ.\n\nPor favor, aguarde alguns minutos e tente transmitir a nota novamente. Se o erro persistir, pode ser uma indisponibilidade geral da SEFAZ do seu estado."
@@ -60,42 +101,54 @@
         "responses": [
         "Este erro acontece em notas de serviço (NFSe) quando o 'Código de Serviço' não está preenchido ou está incorreto no cadastro do serviço.\nPara resolver:\n1. Acesse o cadastro do serviço.\n2. Verifique se o campo 'Cód. Serviço' está preenchido corretamente de acordo com a lista da sua prefeitura.\n3. Grave o cadastro e tente emitir a nota novamente."
         ],
-        "images": ["Erro_notaServicos.png"]
+        "images": [
+        "Erro_notaServicos.png"
+        ]
     },
     "erro_especifico_csosn_vazio": {
         "patterns": [
         "CSOSN(Código de Situação da Operação Simples Nacional) - Nenhum valor informado",
-        "erro csosn", "falha na validação csosn"
+        "erro csosn",
+        "falha na validação csosn"
         ],
         "responses": [
         "Este erro ocorre porque o campo CSOSN (Código de Situação da Operação do Simples Nacional) não foi preenchido para um ou mais produtos da nota.\nPara resolver, acesse o cadastro de cada produto, vá na aba de dados fiscais e preencha o campo CSOSN adequadamente. Depois, tente transmitir a nota novamente."
         ],
-        "images": ["Erro_CsonVazia.png"]
+        "images": [
+        "Erro_CsonVazia.png"
+        ]
     },
     "erro_especifico_ie_invalida": {
         "patterns": [
         "Element '{http://www.portalfiscal.inf.br/nfe}IE': '' is not a valid value",
-        "erro de inscrição estadual", "IE invalida"
+        "erro de inscrição estadual",
+        "IE invalida"
         ],
         "responses": [
         "Este erro indica que o campo de Inscrição Estadual (IE) do destinatário da nota está em branco ou com um formato inválido.\nPara resolver, verifique o cadastro do cliente:\n1. Preencha o campo 'Insc. Estadual' com o número correto.\n2. Se o cliente for Isento, marque a opção 'Isento' ou preencha com a palavra 'ISENTO'.\n3. Se for um consumidor final não contribuinte, o campo deve ficar em branco, mas o indicador de IE do destinatário deve ser '9-Não Contribuinte'."
         ],
-        "images": ["Erro_inscricaoIE.png"]
+        "images": [
+        "Erro_inscricaoIE.png"
+        ]
     },
     "erro_especifico_valor_produto_diverge": {
         "patterns": [
         "Valor do Produto difere do produto Valor Unitário de Comercialização e Quantidade Comercial",
-        "rejeição 629", "erro no valor do produto"
+        "rejeição 629",
+        "erro no valor do produto"
         ],
         "responses": [
         "Este erro de rejeição (629) ocorre quando o valor total do item na nota (Quantidade x Valor Unitário) não bate, geralmente por causa de arredondamentos.\nPara resolver, verifique o item na nota, ajuste o desconto ou o valor unitário com mais casas decimais se necessário, e grave novamente para que o sistema recalcule o total."
         ],
-        "images": ["Erro_ProdDifere.png"]
+        "images": [
+        "Erro_ProdDifere.png"
+        ]
     },
     "erro_especifico_desconto_invalido": {
         "patterns": [
         "Element '{http://www.portalfiscal.inf.br/nfe}vDesc': '-0.57' is not a valid value",
-        "desconto com valor negativo", "erro no desconto"
+        "desconto com valor negativo",
+        "erro no desconto"
         ],
         "responses": [
         "Este erro ocorre quando o valor do desconto calculado resulta em um número negativo ou inválido. Isso pode acontecer por problemas de arredondamento em itens com valor muito baixo.\nPara resolver, verifique os descontos aplicados nos itens do pedido e na nota, e ajuste-os se necessário para evitar valores inconsistentes."
@@ -104,27 +157,37 @@
     "erro_especifico_importacao_di": {
         "patterns": [
         "Element'{http://www.portalfiscal.inf.br/nfe}DI': Missing child element(s)",
-        "erro em nota de importação", "falta elemento DI"
+        "erro em nota de importação",
+        "falta elemento DI"
         ],
         "responses": [
         "Este erro ocorre em notas de importação quando os dados da Declaração de Importação (DI) estão faltando ou incompletos.\nPara resolver:\n1. Edite a nota fiscal e acesse os detalhes do item.\n2. Vá para a aba de 'Importação' e preencha todos os campos obrigatórios da DI.\n3. Grave e tente transmitir a nota novamente."
         ],
-        "images": ["Erro_notaimport.png", "Erro_notaimport1.png"]
+        "images": [
+        "Erro_notaimport.png",
+        "Erro_notaimport1.png"
+        ]
     },
     "erro_especifico_secao_invalida": {
         "patterns": [
         "Os seguintes erros foram encontrados: Secão inválida",
-        "sessao invalida", "secao invalida"
+        "sessao invalida",
+        "secao invalida"
         ],
         "responses": [
         "O erro de 'Seção inválida' geralmente acontece quando o campo 'Seção' no cadastro do produto não está preenchido ou está com um valor que não existe mais. Para corrigir, acesse o cadastro do produto, vá para a aba de detalhes e selecione uma seção válida para ele."
         ],
-        "images": ["Secao_Invalida.png"]
+        "images": [
+        "Secao_Invalida.png"
+        ]
     },
     "erro_especifico_token_correios": {
         "patterns": [
-        "erro de token dos correios", "problema com token", "erro ao gerar ppn",
-        "token inválido", "erro ao verificar token"
+        "erro de token dos correios",
+        "problema com token",
+        "erro ao gerar ppn",
+        "token inválido",
+        "erro ao verificar token"
         ],
         "responses": [
         "O erro de token dos Correios ocorre quando o token de acesso para a integração está inválido, expirado ou não foi configurado.\nPara resolver:\n1. Acesse o portal 'Id Correios' e gere um novo token de acesso.\n2. No sistema Master, vá para a tela de configuração da integração dos Correios e atualize o token.\n3. Verifique se as APIs estão corretamente configuradas e tente novamente."

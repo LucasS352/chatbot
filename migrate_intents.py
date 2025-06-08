@@ -1,4 +1,4 @@
-# File: migrate_intents.py
+# File: migrate_intents.py - VERSÃO CORRIGIDA
 import json
 import sys
 import os
@@ -37,26 +37,20 @@ def clear_existing_intents(db: Session):
         print("  - Tentando reverter transação...")
         db.rollback()
         print("  - Rollback realizado.")
-        # Re-levanta a exceção para que o script principal possa parar a migração
         raise Exception(f"Falha ao limpar tabelas existentes: {e}")
 
 
 def migrate_intents_to_database(json_data: dict, db: Session, clear_all_data_before_migrating: bool = False):
     """
     Migra as intenções do JSON para o banco de dados.
-    Se clear_all_data_before_migrating for True, tenta limpar os dados primeiro.
-    Se clear_all_data_before_migrating for False, verifica a existência de cada intenção pelo título
-    e pula a inserção se já existir para evitar duplicatas.
     """
     
     if clear_all_data_before_migrating:
         try:
             clear_existing_intents(db)
         except Exception as e:
-            # A função clear_existing_intents já imprime o erro e faz rollback.
-            # A exceção é re-levantada para parar o processo aqui.
             print(f"❌ A limpeza dos dados falhou. Abortando a migração. Erro detalhado acima.")
-            return # Aborta a migração se a limpeza falhar
+            return
 
     print("📦 Iniciando migração/verificação das intenções...")
     
@@ -69,18 +63,17 @@ def migrate_intents_to_database(json_data: dict, db: Session, clear_all_data_bef
         print("⚠️ Nenhuma intenção encontrada nos arquivos JSON para migrar.")
         return
 
-    for intent_key, intent_data in json_data.items(): # intent_key é o título da intenção
+    for intent_key, intent_data in json_data.items():
         print(f"\n📋 Processando intenção do JSON: '{intent_key}'")
         
-        # Se não estamos limpando tudo, verificamos se a intenção já existe
         if not clear_all_data_before_migrating:
             existing_intent = db.query(Intent).filter(Intent.title == intent_key).first()
             if existing_intent:
                 print(f"  ⚠️ Intenção '{intent_key}' já existe no banco de dados com ID: {existing_intent.intent_id}. Pulando inserção.")
                 intents_skipped_count += 1
-                continue # Pula para a próxima intenção no arquivo JSON
+                continue
         
-        # Preparar a string de resposta (concatenando múltiplas respostas e info de imagens)
+        # --- Preparar a string de resposta (concatenando múltiplas respostas, info de imagens e quick replies) ---
         responses = intent_data.get('responses', [])
         response_text = "\n\n".join(responses) if isinstance(responses, list) else str(responses)
         
@@ -88,26 +81,34 @@ def migrate_intents_to_database(json_data: dict, db: Session, clear_all_data_bef
         if images:
             image_text = "\n\n🖼️ Imagens relacionadas: " + ", ".join(images)
             response_text += image_text
-        
-        # Prossegue para adicionar a intenção (ou porque estamos limpando tudo, ou porque ela não existia)
+
+        # [INÍCIO DA CORREÇÃO] - Adicionar a lógica dos quick replies
+        quick_replies = intent_data.get('quick_replies', [])
+        if quick_replies:
+            # Converte a lista de botões para uma string JSON compacta e com acentos corretos
+            qr_json_string = json.dumps(quick_replies, separators=(',', ':'), ensure_ascii=False)
+            # Anexa ao texto final no formato esperado pelo backend
+            response_text += f"\n\n🚀 Quick Replies: {qr_json_string}"
+        # [FIM DA CORREÇÃO]
+            
         try:
             print(f"  ➕ Tentando adicionar nova intenção: '{intent_key}'")
             db_intent = Intent(
                 title=intent_key,
-                response=response_text
+                response=response_text # Agora 'response_text' contém os botões!
             )
             db.add(db_intent)
-            db.commit() # Commit para que o intent_id seja gerado e para que ele exista para as variações
-            db.refresh(db_intent) # Obtém o intent_id gerado
+            db.commit()
+            db.refresh(db_intent)
             
-            print(f"    ✅ Intenção '{intent_key}' ADICIONADA com ID: {db_intent.intent_id}")
+            print(f"  	✅ Intenção '{intent_key}' ADICIONADA com ID: {db_intent.intent_id}")
             intents_added_count += 1
             
             current_intent_patterns_added = 0
             patterns = intent_data.get('patterns', [])
             if patterns:
                 for pattern in patterns:
-                    if pattern.strip(): # Ignorar padrões vazios
+                    if pattern.strip():
                         db_variation = IntentVariation(
                             intent_id=db_intent.intent_id,
                             variation=pattern.lower().strip()
@@ -116,8 +117,8 @@ def migrate_intents_to_database(json_data: dict, db: Session, clear_all_data_bef
                         current_intent_patterns_added += 1
                 
                 if current_intent_patterns_added > 0:
-                    db.commit() # Commit das variações para esta intenção
-                print(f"    📝 {current_intent_patterns_added} padrões/variações adicionados para '{intent_key}'.")
+                    db.commit()
+                print(f"  	📝 {current_intent_patterns_added} padrões/variações adicionados para '{intent_key}'.")
                 patterns_added_count += current_intent_patterns_added
             
         except Exception as e:
@@ -134,12 +135,6 @@ def migrate_intents_to_database(json_data: dict, db: Session, clear_all_data_bef
     print(f"   - {patterns_added_count} padrões/variações totais foram ADICIONADOS para as novas intenções.")
 
 
-def update_chat_router_for_images():
-    """Sugestão de atualização para o chat router lidar com imagens (mantida para referência)"""
-    # ... (código da função como antes, não vou repetir aqui para economizar espaço) ...
-    suggestion = "..." # Conteúdo da sugestão
-    return suggestion
-
 def main():
     """Função principal"""
     print("🚀 Script de Migração de Intenções JSON → MySQL")
@@ -152,9 +147,7 @@ def main():
 
     if not os.path.exists(intents_directory) or not os.path.isdir(intents_directory):
         print(f"❌ Diretório de intenções '{intents_directory}' não encontrado!")
-        print(f"💡 Por favor, crie uma pasta chamada '{intents_directory}' no mesmo local deste script")
-        print(f"   e coloque seus arquivos .json de intenções dentro dela.")
-        sys.exit(1) # Sair do script se o diretório não existir
+        sys.exit(1)
 
     aggregated_json_data = {}
     print(f"\n🔍 Lendo arquivos JSON do diretório: '{intents_directory}'...")
@@ -168,7 +161,7 @@ def main():
             
             for intent_key, intent_value in current_file_data.items():
                 if intent_key in aggregated_json_data:
-                    print(f"    ⚠️  Aviso: Intenção '{intent_key}' do arquivo '{filename}' está sobrescrevendo uma intenção com o mesmo nome já carregada de outro arquivo.")
+                    print(f"  	⚠️  Aviso: Intenção '{intent_key}' do arquivo '{filename}' está sobrescrevendo uma intenção com o mesmo nome já carregada de outro arquivo.")
                 aggregated_json_data[intent_key] = intent_value
     
     if not found_json_files:
@@ -185,7 +178,7 @@ def main():
         if clear_prompt_response == 's':
             clear_all_data_flag = True
             break
-        elif clear_prompt_response == 'n' or clear_prompt_response == '': # Aceitar Enter como 'N'
+        elif clear_prompt_response == 'n' or clear_prompt_response == '':
             clear_all_data_flag = False
             break
         else:
@@ -202,7 +195,6 @@ def main():
         migrate_intents_to_database(aggregated_json_data, db, clear_all_data_flag)
     except Exception as e:
         print(f"❌ Ocorreu um erro geral durante o processo de migração: {e}")
-        print("   Verifique os logs acima para mais detalhes. O banco de dados pode estar em um estado inconsistente.")
     finally:
         db.close()
         print("🔌 Conexão com o banco de dados fechada.")

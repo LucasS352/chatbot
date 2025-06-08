@@ -3,12 +3,17 @@
         "patterns": [
         "como deixo minha impressora padrao no master?",
         "como faço a troca de impressora no sistema",
-        "configurar impressora", "impressora padrão"
+        "configurar impressora",
+        "impressora padrão"
         ],
         "responses": [
         "Para definir sua impressora como padrão no sistema, siga os passos nas imagens:"
         ],
-        "images": ["Duvida_impressoraPadrao.png", "Duvida_impressoraPadrao1.png","Duvida_impressoraPadrao2.png"]
+        "images": [
+        "Duvida_impressoraPadrao.png",
+        "Duvida_impressoraPadrao1.png",
+        "Duvida_impressoraPadrao2.png"
+        ]
     },
     "processo_faturar_outra_empresa": {
         "patterns": [
@@ -20,7 +25,9 @@
         "responses": [
         "Para faturar a nota em outra empresa, siga estes passos:\n\n1. Acesse o menu 'Venda e Gerenciamento'.\n2. Selecione o pedido desejado e clique em 'Nota'.\n3. Na tela de faturamento, escolha a empresa correta antes de prosseguir.\n\nDessa forma, a nota será emitida pela empresa selecionada."
         ],
-        "images": ["Duvida_faturanota.png"]
+        "images": [
+        "Duvida_faturanota.png"
+        ]
     },
     "processo_verificar_pedido_integracao": {
         "patterns": [
@@ -30,7 +37,30 @@
         "pedido nao integrou"
         ],
         "responses": [
-        "Entendi. Primeiro, verifique se os pedidos estão na plataforma do seu integrador (Hub de Marketplace). Se não estiverem lá, o problema é na comunicação entre seu Marketplace e o integrador. Se os pedidos estiverem no integrador mas não no Master, por favor, entre em contato com nosso suporte no tel: (14) 3879-0580."
+        "Entendi. Primeiro, verifique se os pedidos estão na plataforma do seu integrador (Hub de Marketplace). Se não estiverem lá, o problema é na comunicação entre seu Marketplace e o integrador. Se os pedidos estiverem no integrador mas não no Master, por favor, entre em contato com nosso suporte."
+        ],
+        "quick_replies": [
+        {
+            "title": "Ver contato do suporte",
+            "payload": "contato do suporte"
+        }
+        ]
+    },
+        "processo_verificar_status_pedido": {
+        "patterns": [
+        "verificar status de pedido",
+        "qual o status do meu pedido",
+        "onde está meu pedido",
+        "rastrear meu pedido"
+        ],
+        "responses": [
+        "Com certeza! Para verificar o status, por favor, me informe o número do seu pedido ou o código de rastreio."
+        ],
+        "quick_replies": [
+        {
+            "title": "Não sei meu número",
+            "payload": "Preciso de ajuda de um atendente"
+        }
         ]
     },
     "processo_devolucao_venda": {
@@ -44,7 +74,22 @@
         "responses": [
         "O processo para realizar uma devolução de venda está detalhado nas imagens abaixo:"
         ],
-        "images": ["Duvida_devolucao0.png", "Duvida_devolucao.png", "Duvida_devolucao1.png", "Duvida_devolucao2.png"]
+        "images": [
+        "Duvida_devolucao0.png",
+        "Duvida_devolucao.png",
+        "Duvida_devolucao1.png",
+        "Duvida_devolucao2.png"
+        ],
+        "quick_replies": [
+        {
+            "title": "Falar com suporte",
+            "payload": "falar com atendente"
+        },
+        {
+            "title": "Tenho outra dúvida",
+            "payload": "pode me ajudar?"
+        }
+        ]
     },
     "processo_estorno_venda": {
         "patterns": [
@@ -56,7 +101,9 @@
         "responses": [
         "Para realizar o estorno de uma venda, siga o passo a passo na imagem:"
         ],
-        "images": ["Duvida_EstornoVenda.png"]
+        "images": [
+        "Duvida_EstornoVenda.png"
+        ]
     },
     "processo_excluir_boleto": {
         "patterns": [
@@ -80,7 +127,11 @@
         "responses": [
         "O processo de criação e configuração de um grupo de usuários está nos prints abaixo:"
         ],
-        "images": ["Duvida_CadastroUsuario.png", "Duvida_CadastroUsuario1.png", "Duvida_CadastroUsuario2.png"]
+        "images": [
+        "Duvida_CadastroUsuario.png",
+        "Duvida_CadastroUsuario1.png",
+        "Duvida_CadastroUsuario2.png"
+        ]
     },
     "processo_enviar_xml_contador": {
         "patterns": [
@@ -91,6 +142,19 @@
         "responses": [
         "Claro, para enviar os arquivos XML para a sua contabilidade, siga este processo:"
         ],
-        "images": ["Duvidas_XMLcont.png", "Duvidas_XMLcont1.png"]
+        "images": [
+        "Duvidas_XMLcont.png",
+        "Duvidas_XMLcont1.png"
+        ],
+        "quick_replies": [
+        {
+            "title": "Entendi, obrigado!",
+            "payload": "obrigado"
+        },
+        {
+            "title": "Ainda preciso de ajuda",
+            "payload": "falar com atendente"
+        }
+        ]
     }
     }

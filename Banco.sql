@@ -72,4 +72,4 @@ ADD FOREIGN KEY (client_id) REFERENCES clients(client_id) ON DELETE CASCADE;
 #insersão de clientes 
 
 INSERT INTO clients (client_name, access_token) 
-VALUES ('Empresa Teste Principal', 'COLE_SEU_TOKEN_AQUI');
+VALUES ('magalu', 'a4ef17ab5b04447cc7f223b813fccef7bc52ab29e06b66a3');

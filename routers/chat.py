@@ -1,12 +1,14 @@
 # File: routers/chat.py
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from models import ChatMessage
-from database import get_db, Client, Conversation, Message as DB_Message, Intent, IntentVariation # Client importado, User removido
+from database import get_db, Client, Conversation, Message as DB_Message, Intent, IntentVariation
 import re
 import random
 from datetime import datetime, timedelta
+import json # <<< [NOVO] Importado para processar os botões
 
 # Importa a função do nosso serviço de NLP
 from nlp_service import find_best_intent_nlp
@@ -16,22 +18,20 @@ CONFIDENCE_THRESHOLD = 60  # Limiar de confiança
 router = APIRouter()
 
 
-# --- INÍCIO DAS NOVAS FUNÇÕES E MODIFICAÇÕES ---
+# --- Funções de suporte (sem alterações) ---
 
 def get_client_by_token(db: Session, token: str) -> Client:
     """Busca um cliente pelo access_token. Levanta um erro 403 se não encontrar."""
     if not token:
         raise HTTPException(status_code=403, detail="Token de acesso não fornecido.")
-        
+    
     client = db.query(Client).filter(Client.access_token == token).first()
     
     if not client:
-        # O erro 403 (Forbidden) é apropriado aqui, pois o acesso é negado
         raise HTTPException(status_code=403, detail="Token de acesso inválido ou não autorizado.")
         
     return client
 
-# A função get_or_create_conversation agora usa client_id
 def get_or_create_conversation(db: Session, client_id: int) -> Conversation:
     """Busca uma conversa ativa recente para o cliente ou cria uma nova."""
     recent_conversation = (
@@ -62,8 +62,8 @@ def get_or_create_conversation(db: Session, client_id: int) -> Conversation:
     db.refresh(conversation)
     return conversation
 
-# Função find_exact_match permanece a mesma
 def find_exact_match(db: Session, message: str) -> Optional[Intent]:
+    """Busca um match exato da mensagem em IntentVariation."""
     message_lower = message.lower().strip()
     variation = db.query(IntentVariation).filter(IntentVariation.variation == message_lower).first()
     if variation:
@@ -77,16 +77,13 @@ async def chat(api_message: ChatMessage, db: Session = Depends(get_db)):
     Endpoint principal do chat. Valida o token e processa a pergunta.
     """
     try:
-        # 1. Valida o token e obtém o cliente
+        # 1. Validação e obtenção de dados (sem alterações)
         client = get_client_by_token(db, api_message.token)
-        
-        # 2. Obtém ou cria a conversa para o cliente validado
         conversation = get_or_create_conversation(db, client.client_id)
         
-        # 3. Salva a mensagem do usuário
         user_msg = DB_Message(
             conversation_id=conversation.conversation_id,
-            sender="user", # Podemos manter "user" ou usar o nome do cliente
+            sender="user",
             content=api_message.question
         )
         db.add(user_msg)
@@ -96,7 +93,7 @@ async def chat(api_message: ChatMessage, db: Session = Depends(get_db)):
         print(f"Cliente: '{client.client_name}' (ID: {client.client_id})")
         print(f"Pergunta: '{api_message.question}'")
 
-        # 4. Lógica de busca de intenção (híbrida)
+        # 2. Lógica de busca de intenção (sem alterações)
         found_intent = find_exact_match(db, api_message.question)
         source_of_match = "Match Exato (Confiança: 100%)"
 
@@ -108,20 +105,37 @@ async def chat(api_message: ChatMessage, db: Session = Depends(get_db)):
                 print(f"-> Confiança abaixo do limiar. Match descartado.")
                 found_intent = None
         
-        # O resto da lógica para processar a resposta e retornar permanece o mesmo...
-        # ...
-
+        # --- [INÍCIO DAS MODIFICAÇÕES] ---
+        
         bot_response_text_final = ""
         image_names = []
+        quick_replies_data = [] # <<< [NOVO] Inicializa lista de botões
+
         if found_intent:
             print(f"-> Intenção determinada: '{found_intent.title}' (Fonte: {source_of_match})")
             response_full_text = found_intent.response
-            # ... (Lógica de extrair imagens e escolher resposta aleatória)
+            
+            # <<< [NOVO] Lógica para extrair os botões de resposta rápida (quick replies)
+            quick_reply_pattern = r'🚀 Quick Replies: (\[.*?\])'
+            qr_match = re.search(quick_reply_pattern, response_full_text, re.DOTALL)
+            if qr_match:
+                try:
+                    # Carrega a string JSON para uma lista python
+                    quick_replies_data = json.loads(qr_match.group(1))
+                    # Remove a string dos botões da resposta principal
+                    response_full_text = re.sub(quick_reply_pattern, '', response_full_text).strip()
+                except json.JSONDecodeError:
+                    print("AVISO: Erro ao decodificar JSON dos quick replies.")
+                    quick_replies_data = []
+            
+            # Lógica existente para extrair imagens
             image_pattern = r'🖼️ Imagens relacionadas: ([^\n]+)'
             match = re.search(image_pattern, response_full_text)
             if match:
                 image_names = [img.strip() for img in match.group(1).split(',')]
                 response_full_text = re.sub(image_pattern, '', response_full_text).strip()
+                
+            # Lógica existente para escolher resposta aleatória
             possible_responses = [res.strip() for res in response_full_text.split('\n\n') if res.strip()]
             if possible_responses:
                 bot_response_text_final = random.choice(possible_responses)
@@ -134,15 +148,24 @@ async def chat(api_message: ChatMessage, db: Session = Depends(get_db)):
         db.add(bot_msg)
         db.commit()
         db.refresh(bot_msg)
-        response_payload = { "status": "success", "response": bot_response_text_final, "conversation_id": conversation.conversation_id, "message_id": bot_msg.message_id }
+
+        # <<< [MODIFICADO] Adiciona a lista de botões ao payload da resposta
+        response_payload = { 
+            "status": "success", 
+            "response": bot_response_text_final, 
+            "conversation_id": conversation.conversation_id, 
+            "message_id": bot_msg.message_id,
+            "quick_replies": quick_replies_data # Adiciona a lista (vazia ou não)
+        }
+        
         if image_names:
             base_image_url = "http://localhost:8000/images/"
             image_urls = [f"{base_image_url}{name}" for name in image_names]
             response_payload["images"] = image_urls
+            
         return response_payload
 
     except HTTPException:
-        # Re-levanta exceções HTTP (como o 403 de token inválido) para que o FastAPI as retorne corretamente
         raise
     except Exception as e:
         import traceback
@@ -150,8 +173,4 @@ async def chat(api_message: ChatMessage, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Ocorreu um erro interno: {str(e)}")
 
-
-# Os endpoints GET não são mais úteis com 'user_id', precisariam ser adaptados para 'client_id' ou outra forma
-# Por enquanto, vou deixá-los comentados para não causar erros.
-# @router.get("/conversations/{user_id}") ...
-# @router.get("/conversations/{conversation_id}/messages") ...
+# --- [FIM DAS MODIFICAÇÕES] ---

@@ -1,0 +1,18 @@
+requirements.txt
+
+*Framework da API e Servidor
+fastapi
+uvicorn[standard]
+Banco de Dados
+SQLAlchemy
+PyMySQL
+
+*Processamento de Linguagem Natural (NLP)
+spacy
+fuzzywuzzy
+python-Levenshtein
+
+
+*Dashboard de Análise
+streamlit
+pandas

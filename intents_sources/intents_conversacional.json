@@ -7,8 +7,25 @@
         "olá, preciso de ajuda", "oi, pode me ajudar?"
         ],
         "responses": [
-        "Olá! Sou a Clara, assistente virtual do ERP Master. Como posso ajudar?",
-        "Oi! Em qual tema você precisa de ajuda hoje?"
+        "Oi, Em qual tema você precisa de ajuda hoje?"
+        ],
+        "quick_replies": [
+        {
+            "title": "Dúvida sobre um processo",
+            "payload": "Tenho uma dúvida sobre um processo"
+        },
+        {
+            "title": "Relatar um erro",
+            "payload": "Estou com um erro no sistema"
+        },
+        {
+            "title": "Falar com o suporte",
+            "payload": "Falar com um atendente"
+        },
+        {
+        "title": "Status do meu Pedido",
+        "payload": "verificar status de pedido"
+    }
         ]
     },
     "conversacional_duvida_geral": {
@@ -16,16 +33,32 @@
         "Estou com dúvida em um processo, pode me ajudar?",
         "Tenho uma dúvida sobre o sistema, como faço?",
         "preciso de ajuda",
-        "pode me ajudar?"
+        "pode me ajudar?",
+        "Tenho uma dúvida sobre um processo",
+        "Tenho outra dúvida"
         ],
         "responses": [
         "Com certeza! Me diga qual é a sua dúvida ou em qual parte do sistema você está com dificuldades, que eu te explico o passo a passo. Se preferir, pode me dizer ou colar aqui a mensagem de erro que aparece."
+        ],
+        "quick_replies": [
+        {
+            "title": "Como emitir uma nota?",
+            "payload": "como mudar a empresa no faturamento da nota?"
+        },
+        {
+            "title": "Como fazer uma devolução?",
+            "payload": "Como faço para fazer uma devolução?"
+        },
+        {
+            "title": "Enviar XML ao contador",
+            "payload": "como faço para enviar os xmls?"
+        }
         ]
     },
     "conversacional_despedida": {
         "patterns": [
         "tchau", "adeus", "até logo", "até mais", "até breve", "falou", "valeu", "obrigado", "obrigada",
-        "entendi, muito obrigado","tchauzinho", "flw", "xau", "bye", "goodbye",
+        "entendi, muito obrigado", "tchauzinho", "flw", "xau", "bye", "goodbye",
         "funcionou aqui, obrigada", "deu certo, obrigado", "finalizar", "era só isso", "por enquanto é só"
         ],
         "responses": [
