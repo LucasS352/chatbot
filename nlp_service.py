@@ -4,6 +4,7 @@ from fuzzywuzzy import fuzz
 from sqlalchemy.orm import Session
 from typing import Optional, Tuple
 from database import Intent, IntentVariation
+import re
 
 # A variável global para o modelo começa como None.
 NLP_MODEL = None
@@ -58,3 +59,13 @@ def find_best_intent_nlp(db: Session, question: str) -> Tuple[Optional[Intent], 
             best_intent = variation.intent
 
     return best_intent, best_score
+
+def extract_order_code(text: str) -> Optional[str]:
+    """
+    Extrai um código de venda (uma sequência de 5 ou 6 dígitos) do texto.
+    A expressão \b garante que estamos pegando um número "inteiro" e não parte de um número maior.
+    """
+    match = re.search(r'\b\d{1,9}\b', text)
+    if match:
+        return match.group(0)
+    return None

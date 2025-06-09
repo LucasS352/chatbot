@@ -37,6 +37,11 @@ CREATE TABLE intents (
     title VARCHAR(255) NOT NULL,  -- Ex: "emitir nota fiscal"
     response TEXT NOT NULL        -- A resposta que o bot deve retornar
 );
+ALTER TABLE `intents` 
+ADD COLUMN `quick_replies` TEXT NULL DEFAULT NULL AFTER `response`;
+
+ALTER TABLE `intents` 
+ADD COLUMN `images` TEXT NULL DEFAULT NULL AFTER `quick_replies`;
 
 CREATE TABLE intent_variations (
     variation_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -49,6 +54,7 @@ CREATE TABLE clients (
     client_id INT AUTO_INCREMENT PRIMARY KEY,
     client_name VARCHAR(255) UNIQUE NOT NULL,
     access_token VARCHAR(64) UNIQUE NOT NULL, -- Para armazenar a chave secreta
+    master_api_token VARCHAR(64) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- Adicionar um índice no token para buscas rápidas

@@ -94,7 +94,7 @@ def local_css(file_name):
 # --- Início da Interface do Dashboard ---
 
 st.set_page_config(page_title="Dashboard de Análise", layout="wide")
-local_css("assets/style.css")
+local_css("assetsdashboard/style.css")
 
 st.title("📊 Dashboard de Análise de Conversas do ERP Master")
 
