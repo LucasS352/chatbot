@@ -1,18 +1,25 @@
-requirements.txt
-
-*Framework da API e Servidor
+# --- Framework da API e Servidor ---
 fastapi
 uvicorn[standard]
-Banco de Dados
+pydantic-settings
+
+# --- Banco de Dados ---
 SQLAlchemy
 PyMySQL
 
-*Processamento de Linguagem Natural (NLP)
+# --- Comunicação com API Externa ---
+httpx
+
+# --- Processamento de Linguagem Natural (NLP) ---
+# Biblioteca principal de NLP
 spacy
-fuzzywuzzy
-python-Levenshtein
 
+# Pacote com dados auxiliares (lookups) para o spaCy
+spacy-lookups-data
 
-*Dashboard de Análise
+# Usado para dividir os dados em treino/teste no script de treinamento
+scikit-learn
+
+# --- Dashboard de Análise (Componente Opcional) ---
 streamlit
 pandas

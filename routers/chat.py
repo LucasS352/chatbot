@@ -1,176 +1,245 @@
 # File: routers/chat.py
+# VERSÃO ATUALIZADA - Inclui o handler para a funcionalidade de Consulta de Cliente.
 
+import logging
+import json
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import Optional, List
-from models import ChatMessage
-from database import get_db, Client, Conversation, Message as DB_Message, Intent, IntentVariation
-import re
-import random
+from typing import Dict, Any
 from datetime import datetime, timedelta
-import json # <<< [NOVO] Importado para processar os botões
 
-# Importa a função do nosso serviço de NLP
-from nlp_service import find_best_intent_nlp
+# Nossas importações de módulos
+from models import ChatMessage
+from database import get_db, Client, Conversation, Message as DB_Message, Intent
+from nlp_service import find_best_intent_nlp, extract_order_code, extract_product_code, extract_document_number
+from api_service import MasterAPIClient
+from config import settings # Importa a configuração central
 
-CONFIDENCE_THRESHOLD = 60  # Limiar de confiança
+# --- CONFIGURAÇÃO ---
+CONFIDENCE_THRESHOLD = 55
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(name)s] - %(message)s')
+log = logging.getLogger(__name__)
 
 router = APIRouter()
 
-
-# --- Funções de suporte (sem alterações) ---
-
+# --- FUNÇÕES DE SUPORTE ---
 def get_client_by_token(db: Session, token: str) -> Client:
-    """Busca um cliente pelo access_token. Levanta um erro 403 se não encontrar."""
+    """Autentica o cliente pelo token de acesso."""
     if not token:
         raise HTTPException(status_code=403, detail="Token de acesso não fornecido.")
-    
     client = db.query(Client).filter(Client.access_token == token).first()
-    
     if not client:
+        log.warning(f"Tentativa de acesso com token inválido: {token}")
         raise HTTPException(status_code=403, detail="Token de acesso inválido ou não autorizado.")
-        
     return client
 
 def get_or_create_conversation(db: Session, client_id: int) -> Conversation:
-    """Busca uma conversa ativa recente para o cliente ou cria uma nova."""
-    recent_conversation = (
-        db.query(Conversation)
-        .filter(Conversation.client_id == client_id)
-        .order_by(Conversation.start_time.desc())
-        .first()
-    )
-    
+    """Obtém a conversa atual ou cria uma nova se a última interação foi há mais de 30 minutos."""
+    recent_conversation = db.query(Conversation).filter(Conversation.client_id == client_id).order_by(Conversation.start_time.desc()).first()
     if recent_conversation:
         thirty_minutes_ago = datetime.now() - timedelta(minutes=30)
-        last_message_in_conv = (
-            db.query(DB_Message)
-            .filter(
-                DB_Message.conversation_id == recent_conversation.conversation_id,
-                DB_Message.timestamp > thirty_minutes_ago
-            )
-            .first()
-        )
+        last_message_in_conv = db.query(DB_Message).filter(DB_Message.conversation_id == recent_conversation.conversation_id, DB_Message.timestamp > thirty_minutes_ago).order_by(DB_Message.timestamp.desc()).first()
         if last_message_in_conv:
-            print(f"Continuando conversa existente ID: {recent_conversation.conversation_id}")
             return recent_conversation
-    
-    print(f"Criando nova conversa para o client_id: {client_id}")
+            
     conversation = Conversation(client_id=client_id)
     db.add(conversation)
     db.commit()
     db.refresh(conversation)
     return conversation
 
-def find_exact_match(db: Session, message: str) -> Optional[Intent]:
-    """Busca um match exato da mensagem em IntentVariation."""
-    message_lower = message.lower().strip()
-    variation = db.query(IntentVariation).filter(IntentVariation.variation == message_lower).first()
-    if variation:
-        return variation.intent
-    return None
+# --- ARQUITETURA DE HANDLERS DE INTENÇÃO ---
 
+async def default_handler(db: Session, client: Client, intent: Intent, message: str) -> Dict[str, Any]:
+    """Manipulador padrão: extrai dados estruturados do objeto Intent do banco de dados."""
+    log.info(f"Usando default_handler para a intenção: '{intent.title}'")
+    return {
+        "text": intent.response,
+        "quick_replies": json.loads(intent.quick_replies) if intent.quick_replies else [],
+        "images": json.loads(intent.images) if intent.images else []
+    }
 
-@router.post("/chat")
-async def chat(api_message: ChatMessage, db: Session = Depends(get_db)):
-    """
-    Endpoint principal do chat. Valida o token e processa a pergunta.
-    """
+async def handle_status_pedido(db: Session, client: Client, intent: Intent, message: str) -> Dict[str, Any]:
+    """Manipulador para a intenção 'processo_status_pedido' que consulta a API."""
+    log.info(f"Usando handle_status_pedido para a intenção: '{intent.title}'")
+    codigo_venda = extract_order_code(message)
+    response_data = {"text": intent.response, "quick_replies": [], "images": []}
+
+    if not codigo_venda:
+        response_data["text"] = "Não consegui identificar o código do pedido. Poderia informá-lo novamente?"
+        return response_data
+
+    if not all([client.master_api_token, client.master_api_url, client.master_api_banco]):
+        response_data["text"] = "Sua empresa não possui a integração com o ERP Master configurada corretamente. Por favor, contate o suporte."
+        log.error(f"Cliente {client.client_id} tentou usar API sem credenciais completas.")
+        return response_data
+
+    api_client = MasterAPIClient(
+        token=client.master_api_token,
+        base_url=client.master_api_url,
+        banco=client.master_api_banco,
+        client_id_log=client.client_id
+    )
+    
     try:
-        # 1. Validação e obtenção de dados (sem alterações)
+        api_response = await api_client.get_venda(codigo_venda)
+        if api_response and "venda" in api_response and isinstance(api_response["venda"], list) and len(api_response["venda"]) > 0:
+            sale_data = api_response["venda"][0]
+            status = sale_data.get("DescricaoStatus", "não informado")
+            data_venda_str = sale_data.get("DataVenda")
+            valor_total = float(sale_data.get("ValorTotal", 0.0))
+            nome_cliente = sale_data.get("EntregaNome", "cliente não informado")
+            data_formatada = data_venda_str
+            if data_venda_str:
+                try:
+                    data_obj = datetime.fromisoformat(data_venda_str)
+                    data_formatada = data_obj.strftime('%d/%m/%Y')
+                except (ValueError, TypeError):
+                    log.warning(f"Não foi possível formatar a data: {data_venda_str}")
+            response_data["text"] = (
+                f"Encontrei os detalhes do pedido {codigo_venda}:\n"
+                f"• Cliente: {nome_cliente}\n"
+                f"• Data da Venda: {data_formatada}\n"
+                f"• Valor Total:R$ {valor_total:.2f}\n"
+                f"• Status Atual: {status}"
+            )
+        else:
+            response_data["text"] = f"Não encontrei nenhum pedido com o código {codigo_venda}. Por favor, verifique o número e tente novamente."
+    finally:
+        await api_client.close()
+        
+    return response_data
+
+async def handle_consulta_produto(db: Session, client: Client, intent: Intent, message: str) -> Dict[str, Any]:
+    """Manipulador para a intenção 'consulta_produto_por_codigo' que consulta a API."""
+    log.info(f"Usando handle_consulta_produto para a intenção: '{intent.title}'")
+    codigo_produto = extract_product_code(message)
+    response_data = {"text": intent.response, "quick_replies": [], "images": []}
+
+    if not codigo_produto:
+        response_data["text"] = "Não consegui identificar o código do produto. Poderia informá-lo novamente?"
+        return response_data
+
+    if not all([client.master_api_token, client.master_api_url, client.master_api_banco]):
+        response_data["text"] = "Sua empresa não possui a integração com o ERP Master configurada corretamente."
+        log.error(f"Cliente {client.client_id} tentou usar API sem credenciais completas.")
+        return response_data
+
+    api_client = MasterAPIClient(
+        token=client.master_api_token,
+        base_url=client.master_api_url,
+        banco=client.master_api_banco,
+        client_id_log=client.client_id
+    )
+    
+    try:
+        api_response = await api_client.get_produto(codigo_produto)
+        product_data = None
+        if isinstance(api_response, dict) and "produto" in api_response and isinstance(api_response["produto"], dict):
+            product_data = api_response["produto"]
+        if product_data and "Codigo" in product_data:
+            nome = product_data.get("Nome", "Nome não disponível")
+            preco = product_data.get("PrecoVenda", 0.0)
+            estoque = product_data.get("EstoqueAtual", 0.0)
+            response_data["text"] = (
+                f"Aqui estão os detalhes do produto **{codigo_produto}**:\n"
+                f"• **Nome:** {nome}\n"
+                f"• **Preço de Venda:** R$ {float(preco):.2f}\n"
+                f"• **Estoque Atual:** {float(estoque):.0f} unidades"
+            )
+        else:
+            response_data["text"] = f"Não encontrei nenhum produto com o código {codigo_produto}. Por favor, verifique o número."
+    finally:
+        await api_client.close()
+        
+    return response_data
+
+# --- NOVO HANDLER PARA CONSULTA DE CLIENTE ---
+async def handle_consulta_cliente(db: Session, client: Client, intent: Intent, message: str) -> Dict[str, Any]:
+    """Manipulador para a intenção 'consulta_cliente_por_documento' que consulta a API."""
+    log.info(f"Usando handle_consulta_cliente para a intenção: '{intent.title}'")
+    documento = extract_document_number(message)
+    response_data = {"text": intent.response, "quick_replies": [], "images": []}
+
+    if not documento:
+        response_data["text"] = "Não consegui identificar um número de CPF ou CNPJ na sua pergunta. Poderia informar novamente?"
+        return response_data
+    
+    api_client = MasterAPIClient(
+        token=client.master_api_token,
+        base_url=client.master_api_url,
+        banco=client.master_api_banco,
+        client_id_log=client.client_id
+    )
+    
+    try:
+        api_response = await api_client.get_cliente_by_documento(documento)
+        
+        if api_response and "clientes" in api_response and isinstance(api_response["clientes"], list) and api_response["clientes"]:
+            client_data = api_response["clientes"][0]
+            nome = client_data.get("Nome", "N/A")
+            email = client_data.get("Email", "N/A")
+            municipio = client_data.get("MunicipioNome", "N/A")
+            response_data["text"] = (
+                f"Encontrei o cadastro para o documento **{documento}**:\n"
+                f"• **Nome:** {nome}\n"
+                f"• **Município:** {municipio}\n"
+                f"• **E-mail:** {email}"
+            )
+        else:
+            response_data["text"] = f"Não encontrei nenhum cliente com o documento {documento}."
+    finally:
+        await api_client.close()
+        
+    return response_data
+
+# --- ATUALIZAÇÃO DO MAPA DE INTENÇÕES PARA HANDLERS ---
+INTENT_HANDLERS = {
+    "processo_status_pedido": handle_status_pedido,
+    "consulta_produto_por_codigo": handle_consulta_produto,
+    "consulta_cliente_por_documento": handle_consulta_cliente,
+}
+
+# --- ENDPOINT PRINCIPAL DO CHAT (SEM ALTERAÇÕES) ---
+@router.post("/chat", response_model=Dict[str, Any])
+async def chat(api_message: ChatMessage, db: Session = Depends(get_db)):
+    try:
         client = get_client_by_token(db, api_message.token)
         conversation = get_or_create_conversation(db, client.client_id)
         
-        user_msg = DB_Message(
-            conversation_id=conversation.conversation_id,
-            sender="user",
-            content=api_message.question
-        )
-        db.add(user_msg)
+        db.add(DB_Message(conversation_id=conversation.conversation_id, sender="user", content=api_message.question))
         db.commit()
-        db.refresh(user_msg)
-        print(f"\n--- Nova Mensagem ---")
-        print(f"Cliente: '{client.client_name}' (ID: {client.client_id})")
-        print(f"Pergunta: '{api_message.question}'")
+        log.info(f"Cliente: '{client.client_name}', Pergunta: '{api_message.question}'")
 
-        # 2. Lógica de busca de intenção (sem alterações)
-        found_intent = find_exact_match(db, api_message.question)
-        source_of_match = "Match Exato (Confiança: 100%)"
-
-        if not found_intent:
-            found_intent, score = find_best_intent_nlp(db, api_message.question)
-            print(f"Score de confiança do PLN: {score}%")
-            source_of_match = f"PLN (Confiança: {score}%)"
-            if score < CONFIDENCE_THRESHOLD:
-                print(f"-> Confiança abaixo do limiar. Match descartado.")
-                found_intent = None
+        intent_title, score = find_best_intent_nlp(api_message.question)
         
-        # --- [INÍCIO DAS MODIFICAÇÕES] ---
+        found_intent = None
+        if intent_title and score >= CONFIDENCE_THRESHOLD:
+            found_intent = db.query(Intent).filter(Intent.title == intent_title).first()
         
-        bot_response_text_final = ""
-        image_names = []
-        quick_replies_data = [] # <<< [NOVO] Inicializa lista de botões
-
         if found_intent:
-            print(f"-> Intenção determinada: '{found_intent.title}' (Fonte: {source_of_match})")
-            response_full_text = found_intent.response
-            
-            # <<< [NOVO] Lógica para extrair os botões de resposta rápida (quick replies)
-            quick_reply_pattern = r'🚀 Quick Replies: (\[.*?\])'
-            qr_match = re.search(quick_reply_pattern, response_full_text, re.DOTALL)
-            if qr_match:
-                try:
-                    # Carrega a string JSON para uma lista python
-                    quick_replies_data = json.loads(qr_match.group(1))
-                    # Remove a string dos botões da resposta principal
-                    response_full_text = re.sub(quick_reply_pattern, '', response_full_text).strip()
-                except json.JSONDecodeError:
-                    print("AVISO: Erro ao decodificar JSON dos quick replies.")
-                    quick_replies_data = []
-            
-            # Lógica existente para extrair imagens
-            image_pattern = r'🖼️ Imagens relacionadas: ([^\n]+)'
-            match = re.search(image_pattern, response_full_text)
-            if match:
-                image_names = [img.strip() for img in match.group(1).split(',')]
-                response_full_text = re.sub(image_pattern, '', response_full_text).strip()
-                
-            # Lógica existente para escolher resposta aleatória
-            possible_responses = [res.strip() for res in response_full_text.split('\n\n') if res.strip()]
-            if possible_responses:
-                bot_response_text_final = random.choice(possible_responses)
+            log.info(f"Intenção prevista: '{found_intent.title}' com confiança de {score:.2f}%")
+            handler = INTENT_HANDLERS.get(found_intent.title, default_handler)
+            response_data = await handler(db, client, found_intent, api_message.question)
         else:
-            print("-> Nenhuma intenção encontrada. Usando resposta padrão.")
-            bot_response_text_final = "Desculpe, não tenho certeza de como ajudar. Pode reformular?"
-        
-        print(f"Resposta do Bot: '{bot_response_text_final}'")
-        bot_msg = DB_Message(conversation_id=conversation.conversation_id, sender="bot", content=bot_response_text_final)
-        db.add(bot_msg)
+            log.warning(f"Nenhuma intenção encontrada ou confiança baixa ({score:.2f}). Mensagem: '{api_message.question}'")
+            response_data = {
+                "text": "Desculpe, não entendi bem o que você precisa. Poderia reformular a pergunta?", 
+                "quick_replies": [], 
+                "images": []
+            }
+
+        db.add(DB_Message(conversation_id=conversation.conversation_id, sender="bot", content=response_data["text"]))
         db.commit()
-        db.refresh(bot_msg)
-
-        # <<< [MODIFICADO] Adiciona a lista de botões ao payload da resposta
-        response_payload = { 
-            "status": "success", 
-            "response": bot_response_text_final, 
-            "conversation_id": conversation.conversation_id, 
-            "message_id": bot_msg.message_id,
-            "quick_replies": quick_replies_data # Adiciona a lista (vazia ou não)
-        }
         
-        if image_names:
-            base_image_url = "http://localhost:8000/images/"
-            image_urls = [f"{base_image_url}{name}" for name in image_names]
-            response_payload["images"] = image_urls
-            
-        return response_payload
+        return {
+            "status": "success",
+            "response": response_data["text"],
+            "conversation_id": conversation.conversation_id,
+            "quick_replies": response_data["quick_replies"],
+            "images": [f"{settings.APP_BASE_URL}/images/{name}" for name in response_data["images"]]
+        }
 
-    except HTTPException:
-        raise
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Ocorreu um erro interno: {str(e)}")
-
-# --- [FIM DAS MODIFICAÇÕES] ---
+        log.critical(f"Erro crítico não tratado no endpoint de chat: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Ocorreu um erro interno inesperado.")

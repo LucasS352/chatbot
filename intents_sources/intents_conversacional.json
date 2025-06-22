@@ -1,13 +1,36 @@
     {
     "conversacional_saudacao": {
         "patterns": [
-        "olá", "oi", "hey", "bom dia", "boa tarde", "boa noite",
-        "e aí", "tudo bem", "como vai", "prazer", "ola",
-        "olá, tudo bem?", "oi, bom dia", "boa noite, tudo bem?",
-        "olá, preciso de ajuda", "oi, pode me ajudar?"
+        "olá",
+        "oi",
+        "hey",
+        "bom dia",
+        "boa tarde",
+        "boa noite",
+        "e aí",
+        "tudo bem",
+        "como vai",
+        "prazer",
+        "ola",
+        "olá, tudo bem?",
+        "oi, bom dia",
+        "boa noite, tudo bem?",
+        "olá, preciso de ajuda",
+        "oi, pode me ajudar?",
+        "saudações",
+        "como vai você?",
+        "como você está?",
+        "oi tudo bem?",
+        "olá!",
+        "fala ai",
+        "eae"
         ],
         "responses": [
-        "Oi, Em qual tema você precisa de ajuda hoje?"
+        "Olá! Sou seu assistente virtual do sistema ERP. Em qual tema você precisa de ajuda hoje?",
+        "Oi! Como posso te ajudar com o sistema ERP?",
+        "Olá! Tudo bem por aqui. Como posso te auxiliar hoje?",
+        "Olá! Em que posso ser útil?",
+        "Olá! Qual a sua dúvida sobre o sistema ERP?"
         ],
         "quick_replies": [
         {
@@ -23,9 +46,17 @@
             "payload": "Falar com um atendente"
         },
         {
-        "title": "Status do meu Pedido",
-        "payload": "verificar status de pedido"
-    }
+            "title": "Status do meu Pedido",
+            "payload": "verificar status de pedido"
+        },
+        {
+            "title": "Informações sobre CFOP",
+            "payload": "Gostaria de saber mais sobre CFOP"
+        },
+        {
+            "title": "Dúvidas sobre Impostos",
+            "payload": "Tenho dúvidas sobre impostos"
+        }
         ]
     },
     "conversacional_duvida_geral": {
@@ -35,10 +66,24 @@
         "preciso de ajuda",
         "pode me ajudar?",
         "Tenho uma dúvida sobre um processo",
-        "Tenho outra dúvida"
+        "Tenho outra dúvida",
+        "Como faço para...",
+        "Gostaria de saber como...",
+        "Poderia me explicar...",
+        "Não estou entendendo...",
+        "Não sei como fazer...",
+        "Qual o procedimento para...",
+        "Como funciona...",
+        "Me explica como...",
+        "Como que faz...",
+        "Qual o passo a passo para..."
         ],
         "responses": [
-        "Com certeza! Me diga qual é a sua dúvida ou em qual parte do sistema você está com dificuldades, que eu te explico o passo a passo. Se preferir, pode me dizer ou colar aqui a mensagem de erro que aparece."
+        "Com certeza! Me diga qual é a sua dúvida ou em qual parte do sistema você está com dificuldades, que eu te explico o passo a passo.",
+        "Claro! Posso te ajudar com isso. Qual é a sua dúvida?",
+        "Sem problemas! Qual processo ou funcionalidade você precisa de ajuda?",
+        "Estou aqui para te ajudar. Por favor, detalhe sua dúvida.",
+        "Com prazer! Em que posso te ajudar hoje?"
         ],
         "quick_replies": [
         {
@@ -52,21 +97,57 @@
         {
             "title": "Enviar XML ao contador",
             "payload": "como faço para enviar os xmls?"
+        },
+            {
+            "title": "Dúvidas sobre CFOP",
+            "payload": "Gostaria de saber mais sobre CFOP"
+        },
+        {
+            "title": "Dúvidas sobre Impostos",
+            "payload": "Tenho dúvidas sobre impostos"
         }
         ]
     },
     "conversacional_despedida": {
         "patterns": [
-        "tchau", "adeus", "até logo", "até mais", "até breve", "falou", "valeu", "obrigado", "obrigada",
-        "entendi, muito obrigado", "tchauzinho", "flw", "xau", "bye", "goodbye",
-        "funcionou aqui, obrigada", "deu certo, obrigado", "finalizar", "era só isso", "por enquanto é só"
+        "tchau",
+        "adeus",
+        "até logo",
+        "até mais",
+        "até breve",
+        "falou",
+        "valeu",
+        "obrigado",
+        "obrigada",
+        "entendi, muito obrigado",
+        "tchauzinho",
+        "flw",
+        "xau",
+        "bye",
+        "goodbye",
+        "funcionou aqui, obrigada",
+        "deu certo, obrigado",
+        "finalizar",
+        "era só isso",
+        "por enquanto é só",
+        "agradeço a ajuda",
+        "muito obrigado pela ajuda",
+        "obrigado pela atenção",
+        "até a próxima",
+        "foi ótimo, obrigado",
+        "era isso, valeu"
         ],
         "responses": [
         "Até logo! Se precisar de mais alguma coisa, estou à disposição. 😊",
         "Foi um prazer ajudar! Volte sempre que precisar. 👋",
         "Tchau! Se tiver mais dúvidas, é só chamar. Até mais!",
         "Até breve! Estarei aqui se precisar de ajuda. 😄",
-        "Disponha! Se precisar de mais alguma coisa, estou por aqui. 👋"
+        "Disponha! Se precisar de mais alguma coisa, estou por aqui. 👋",
+        "Até a próxima! 😉",
+        "Sempre às ordens! 😊",
+        "Volte sempre! 😉",
+        "Foi um prazer! Até mais! 👋",
+        "Se precisar, já sabe onde me encontrar! 😉"
         ]
     }
     }

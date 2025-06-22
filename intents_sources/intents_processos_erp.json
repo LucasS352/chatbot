@@ -46,23 +46,23 @@
         }
         ]
     },
-        "processo_verificar_status_pedido": {
-        "patterns": [
-        "verificar status de pedido",
-        "qual o status do meu pedido",
+
+    "processo_status_pedido": {
+    "patterns": [
+        "status do pedido",
+        "verificar meu pedido",
+        "gostaria de ver o status do pedido",
+        "qual o status do meu pedido?",
+        "rastrear pedido",
         "onde está meu pedido",
-        "rastrear meu pedido"
-        ],
-        "responses": [
-        "Com certeza! Para verificar o status, por favor, me informe o número do seu pedido ou o código de rastreio."
-        ],
-        "quick_replies": [
-        {
-            "title": "Não sei meu número",
-            "payload": "Preciso de ajuda de um atendente"
-        }
-        ]
-    },
+        "status do pedido 12345",
+        "verificar meu pedido 654321"
+    ],
+    "responses": [
+        "Um momento, estou consultando o status do seu pedido no sistema..."
+    ],
+    "quick_replies": []
+},
     "processo_devolucao_venda": {
         "patterns": [
         "Como faço para fazer uma devolução?",

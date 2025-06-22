@@ -1,60 +1,74 @@
 # File: nlp_service.py
+# VERSÃO CORRIGIDA - Preparado para carregamento na inicialização da API (lifespan).
+
 import spacy
-from fuzzywuzzy import fuzz
-from sqlalchemy.orm import Session
 from typing import Optional, Tuple
-from database import Intent, IntentVariation
+import re
 
-# A variável global para o modelo começa como None.
-NLP_MODEL = None
+MODEL_PATH = "nlp_model" 
+NLP_MODEL = None # O modelo começará como None e será preenchido na inicialização.
 
-def get_nlp_model():
+def load_nlp_model():
     """
-    Carrega o modelo spaCy na primeira vez que é chamado e o armazena na
-    variável global NLP_MODEL. Nas chamadas seguintes, apenas retorna o modelo já carregado.
+    Função que carrega o modelo de NLP na variável global.
+    Esta função deve ser chamada UMA VEZ durante a inicialização da API.
     """
     global NLP_MODEL
     if NLP_MODEL is None:
-        print("[NLP Service] Carregando modelo spaCy 'pt_core_news_sm' pela primeira vez...")
         try:
-            NLP_MODEL = spacy.load("pt_core_news_sm")
-            print("[NLP Service] Modelo spaCy carregado com sucesso.")
+            print(f"[NLP Service] Iniciando o carregamento do modelo customizado de '{MODEL_PATH}'...")
+            NLP_MODEL = spacy.load(MODEL_PATH)
+            print("[NLP Service] ✅ Modelo customizado carregado com sucesso na memória.")
         except OSError:
-            print("ERRO: Modelo 'pt_core_news_sm' não encontrado. Tentando baixar...")
-            from spacy.cli import download
-            download("pt_core_news_sm")
-            NLP_MODEL = spacy.load("pt_core_news_sm")
-            print("[NLP Service] Modelo baixado e carregado com sucesso.")
-    return NLP_MODEL
+            print(f"ERRO CRÍTICO: Modelo não encontrado em '{MODEL_PATH}'.")
+            print("Execute 'python train_model.py' para criar o modelo antes de iniciar a API.")
+            raise
+            
+def find_best_intent_nlp(question: str) -> Tuple[Optional[str], float]:
+    """
+    Usa o modelo de classificação de texto (textcat) JÁ CARREGADO para prever a intenção.
+    """
+    if not NLP_MODEL:
+        # Este erro só acontecerá se a aplicação tentar rodar sem o modelo carregado.
+        raise RuntimeError("O modelo de NLP não foi carregado. Verifique o evento de inicialização da API.")
+    
+    if not question:
+        return None, 0.0
+
+    doc = NLP_MODEL(question.lower())
+    
+    if not doc.cats:
+        return None, 0.0
+
+    best_intent_title = max(doc.cats, key=doc.cats.get)
+    confidence_score = doc.cats[best_intent_title]
+    
+    return best_intent_title, confidence_score * 100
+
+def extract_order_code(text: str) -> Optional[str]:
+    """Extrai um código numérico do texto."""
+    match = re.search(r'\b\d{1,9}\b', text)
+    if match:
+        return match.group(0)
+    return None
+
+def extract_product_code(text: str) -> Optional[str]:
+    """Extrai um código de produto (assumindo ser uma sequência de dígitos) do texto."""
+    match = re.search(r'\b\d{1,9}\b', text)
+    if match:
+        return match.group(0)
+    return None
+
+def extract_document_number(text: str) -> Optional[str]:
+    """Extrai um número de CPF ou CNPJ de uma string, com ou sem pontuação."""
+    match = re.search(r'\b(\d{11}|\d{14})\b', text.replace('.', '').replace('/', '').replace('-', ''))
+    if match:
+        return match.group(0)
+    return None
 
 def preprocess_text(text: str) -> str:
-    """Limpa e normaliza o texto: remove stopwords, pontuação e aplica lematização."""
-    nlp = get_nlp_model() # Pega o modelo (carrega apenas se for a 1ª vez)
+    """Função de pré-processamento usada pelo script de migração."""
+    nlp = spacy.load("pt_core_news_sm")
     doc = nlp(text.lower())
     tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct and token.text.strip()]
     return " ".join(tokens)
-
-def find_best_intent_nlp(db: Session, question: str) -> Tuple[Optional[Intent], int]:
-    """Usa PLN para encontrar a melhor intenção para a pergunta no banco de dados."""
-    if not question:
-        return None, 0
-
-    preprocessed_question = preprocess_text(question)
-    if not preprocessed_question:
-        return None, 0
-
-    variations = db.query(IntentVariation).all()
-    
-    best_score = 0
-    best_intent = None
-
-    for variation in variations:
-        preprocessed_variation = preprocess_text(variation.variation)
-        if not preprocessed_variation:
-            continue
-        score = fuzz.token_sort_ratio(preprocessed_question, preprocessed_variation)
-        if score > best_score:
-            best_score = score
-            best_intent = variation.intent
-
-    return best_intent, best_score

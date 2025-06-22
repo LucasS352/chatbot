@@ -37,11 +37,24 @@ CREATE TABLE intents (
     title VARCHAR(255) NOT NULL,  -- Ex: "emitir nota fiscal"
     response TEXT NOT NULL        -- A resposta que o bot deve retornar
 );
+ALTER TABLE `intents` 
+ADD COLUMN `quick_replies` TEXT NULL DEFAULT NULL AFTER `response`;
+
+ALTER TABLE `intents` 
+ADD COLUMN `images` TEXT NULL DEFAULT NULL AFTER `quick_replies`;
+-- Conecte-se ao seu banco de dados 'pract' e execute estes comandos:
+
+ALTER TABLE `intents`
+ADD COLUMN `quick_replies` TEXT NULL DEFAULT NULL AFTER `response`;
+
+ALTER TABLE `intents`
+ADD COLUMN `images` TEXT NULL DEFAULT NULL AFTER `quick_replies`;
 
 CREATE TABLE intent_variations (
     variation_id INT AUTO_INCREMENT PRIMARY KEY,
     intent_id INT,
     variation TEXT NOT NULL,
+    ALTER TABLE intent_variations ADD COLUMN preprocessed_variation TEXT;
     FOREIGN KEY (intent_id) REFERENCES intents(intent_id) ON DELETE CASCADE
 );
 
@@ -49,8 +62,11 @@ CREATE TABLE clients (
     client_id INT AUTO_INCREMENT PRIMARY KEY,
     client_name VARCHAR(255) UNIQUE NOT NULL,
     access_token VARCHAR(64) UNIQUE NOT NULL, -- Para armazenar a chave secreta
+    master_api_token VARCHAR(64) UNIQUE NOT NULL,
+    master_api_url VARCHAR(64) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE clients ADD COLUMN master_api_banco VARCHAR(100) NOT NULL DEFAULT 'MasterSite' AFTER master_api_url;
 -- Adicionar um índice no token para buscas rápidas
 CREATE INDEX idx_clients_access_token ON clients(access_token);
 

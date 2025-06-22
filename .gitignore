@@ -1,14 +1,16 @@
-# Arquivos do Python
+# Arquivo de segredos - NUNCA ENVIAR PARA O GITHUB
+.env
+
+# Diretórios de cache e dependências do Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Pasta de ambiente virtual
 venv/
-.venv/
+env/
+*.pyc
 
-# Arquivos de IDE e sistema
+# Artefatos de build do modelo de IA
+# Recomendado ignorar, pois é gerado pelo train_model.py e pode ser grande
+nlp_model/
+
+# Arquivos de configuração de IDEs
 .vscode/
 .idea/
-*.DS_Store

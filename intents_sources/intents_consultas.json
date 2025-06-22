@@ -1,0 +1,62 @@
+    {
+    "consulta_produto_por_codigo": {
+        "patterns": [
+        "qual o preço do produto 12345",
+        "consulte o item 54321",
+        "informações do produto 99887",
+        "ficha do item 11223",
+        "quanto custa o 55667",
+        "preço do produto 88990",
+        "temos o item 123 em estoque?",
+        "qual o estoque do produto 543",
+        "verificar estoque 987",
+        "me fala o preço e estoque do 45678",
+        "dados do sku 777",
+        "poderia verificar a referência 888 para mim",
+        "estoque e preço do item 999",
+        "gostaria de saber sobre o produto 101010",
+        "tem o código 223344 disponível?",
+        "verificar disponibilidade do item 555666",
+        "informações do código 7890",
+        "detalhes do produto com código 543",
+        "qual o saldo da peça 111",
+        "checar a referência 222",
+        "preço de venda do sku 333",
+        "status do inventário para o item 444"
+        ],
+        "responses": [
+        "Um momento, estou buscando as informações do produto no sistema...",
+        "Consultando o ERP Master para os dados do produto. Só um instante."
+        ],
+        "quick_replies": [],
+        "images": []
+    },
+    "consulta_cliente_por_documento": {
+        "patterns": [
+        "consultar cliente pelo cnpj 53.132.229/0001-47",
+        "puxar cadastro do cpf 123.456.789-00",
+        "verificar cliente 53132229000147",
+        "dados do cliente com documento 12345678900",
+        "quem é o cliente com cpf 987.654.321-21?",
+        "informações do cnpj 01.234.567/0001-89",
+        "buscar cliente",
+        "encontrar um cliente",
+        "qual o cadastro do cnpj 11.222.333/0001-44",
+        "puxar ficha do cliente com cpf 111.222.333-44",
+        "me dê os dados do cliente com o documento 55566677788",
+        "quero ver o cadastro do cpf 99988877766",
+        "localizar cliente por documento",
+        "buscar pela razão social ou cpf",
+        "dados cadastrais do cnpj 98.765.432/0001-10",
+        "verificar cadastro do cliente 12312312312",
+        "puxar cliente 45645645678",
+        "qual o email do cliente com cnpj 33.333.333/0001-33",
+        "encontrar o telefone do cliente com cpf 222.222.222-22"
+        ],
+        "responses": [
+        "Ok, estou buscando o cadastro deste cliente no ERP Master. Um instante..."
+        ],
+        "quick_replies": [],
+        "images": []
+    }
+    }
